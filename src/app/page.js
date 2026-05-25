@@ -4,15 +4,13 @@ import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import confetti from 'canvas-confetti';
 import { 
-  Star, 
-  CheckCircle, 
+  Moon, 
+  Sun, 
   Heart, 
   Award, 
   Calendar, 
-  Moon, 
-  Sun, 
-  Trash2, 
-  Camera 
+  Star, 
+  CheckCircle 
 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 
@@ -40,12 +38,8 @@ export default function Home() {
   }, [girando]);
 
   const cargarPlanes = async () => {
-    try {
-      const { data } = await supabase.from('planes').select('*').eq('hecho', false);
-      if (data) setPlanes(data);
-    } catch (e) {
-      console.log("Error cargando planes");
-    }
+    const { data } = await supabase.from('planes').select('*').eq('hecho', false);
+    if (data) setPlanes(data);
   };
 
   useEffect(() => { 
@@ -54,12 +48,11 @@ export default function Home() {
 
   const girarRuleta = () => {
     const posibles = planes.filter(p => p.categoria === filtro);
-    if (posibles.length === 0) return alert("No hay planes pendientes en esta categoría");
+    if (posibles.length === 0) return alert("No hay planes");
     setGirando(true);
     setSeleccionado(null);
     setTimeout(() => {
-      const elegido = posibles[Math.floor(Math.random() * posibles.length)];
-      setSeleccionado(elegido);
+      setSeleccionado(posibles[Math.floor(Math.random() * posibles.length)]);
       setGirando(false);
       confetti();
     }, 2000);
@@ -71,7 +64,7 @@ export default function Home() {
       .update({ hecho: true, reseña: reseña.comentario, rating: reseña.rating })
       .eq('id', seleccionado.id);
     if (!error) {
-      alert("¡Plan guardado en el historial! ✨");
+      alert("¡Guardado!");
       setSeleccionado(null);
       setMostrarReseña(false);
       cargarPlanes();
@@ -79,76 +72,36 @@ export default function Home() {
   };
 
   return (
-    <div className="min-h-screen bg-[#fff5f5] p-4 font-sans">
+    <div className="min-h-screen bg-[#fff5f5] p-4">
       <div className="max-w-md mx-auto flex flex-col items-center gap-8 pt-8">
-        
-        <div className="flex items-center gap-2">
-          <Heart className="text-[#e57373]" fill="#e57373" />
-          <h1 className="text-3xl font-bold text-[#e57373]">La Indecisión</h1>
-          <Award className="text-[#e57373]" />
+        <div className="flex items-center gap-4">
+          <Moon size={20} /> <Sun size={20} /> <Heart size={20} /> <Award size={20} /> <Calendar size={20} />
         </div>
+        <h1 className="text-3xl font-bold text-[#e57373]">La Indecisión</h1>
         
         {!mostrarReseña ? (
           <>
-            <div className="flex gap-4 bg-white p-2 rounded-2xl w-full shadow-md">
-              <button onClick={() => setFiltro('hoy')} className={`flex-1 py-3 rounded-xl font-bold transition ${filtro === 'hoy' ? 'bg-[#e57373] text-white' : 'text-gray-400'}`}>
-                <div className="flex items-center justify-center gap-2"><Calendar size={18}/> Hoy</div>
-              </button>
-              <button onClick={() => setFiltro('futuro')} className={`flex-1 py-3 rounded-xl font-bold transition ${filtro === 'futuro' ? 'bg-[#e57373] text-white' : 'text-gray-400'}`}>
-                Futuro
-              </button>
+            <div className="flex gap-4 bg-white p-2 rounded-2xl w-full">
+              <button onClick={() => setFiltro('hoy')} className={`flex-1 py-3 rounded-xl ${filtro === 'hoy' ? 'bg-[#e57373] text-white' : 'text-gray-400'}`}>Hoy</button>
+              <button onClick={() => setFiltro('futuro')} className={`flex-1 py-3 rounded-xl ${filtro === 'futuro' ? 'bg-[#e57373] text-white' : 'text-gray-400'}`}>Futuro</button>
             </div>
-
-            <motion.div 
-              animate={girando ? { rotate: 3600, scale: 1.1 } : { rotate: 0, scale: 1 }} 
-              transition={{ duration: 2, ease: "circOut" }} 
-              className="w-64 h-64 rounded-full border-8 border-[#e57373] border-dashed flex items-center justify-center bg-white text-8xl shadow-2xl"
-            >
+            <motion.div animate={girando ? { rotate: 3600 } : { rotate: 0 }} className="w-64 h-64 rounded-full border-8 border-[#e57373] flex items-center justify-center bg-white text-8xl">
               {emojiActual}
             </motion.div>
-
-            <button 
-              onClick={girarRuleta} 
-              disabled={girando} 
-              className={`w-full py-4 rounded-2xl text-white font-bold text-xl shadow-lg transition active:scale-95 ${girando ? 'bg-gray-400' : 'bg-[#e57373]'}`}
-            >
-              {girando ? "Decidiendo..." : "Girar Ruleta"}
-            </button>
-
-            <AnimatePresence>
-              {seleccionado && !girando && (
-                <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="w-full bg-white p-6 rounded-3xl border-2 border-[#e57373] text-center shadow-xl">
-                  <p className="text-gray-400 text-xs font-bold mb-1 uppercase">Plan elegido</p>
-                  <h2 className="text-2xl font-bold text-gray-800 mb-6">{seleccionado.titulo}</h2>
-                  <button onClick={() => setMostrarReseña(true)} className="w-full bg-green-500 text-white py-3 rounded-xl font-bold flex items-center justify-center gap-2">
-                    <CheckCircle size={20} /> ¡Lo hemos hecho!
-                  </button>
-                </motion.div>
-              )}
-            </AnimatePresence>
+            <button onClick={girarRuleta} className="w-full py-4 rounded-2xl text-white bg-[#e57373] font-bold">Girar Ruleta</button>
+            {seleccionado && !girando && (
+              <div className="w-full bg-white p-6 rounded-3xl border-2 border-[#e57373] text-center">
+                <h2 className="text-2xl font-bold mb-4">{seleccionado.titulo}</h2>
+                <button onClick={() => setMostrarReseña(true)} className="w-full bg-green-500 text-white py-3 rounded-xl">¡Hecho!</button>
+              </div>
+            )}
           </>
         ) : (
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="w-full bg-white p-6 rounded-3xl shadow-xl">
-            <h2 className="text-xl font-bold mb-4 text-center">¿Qué tal estuvo el plan?</h2>
-            <div className="flex justify-center gap-2 mb-6">
-              {[1,2,3,4,5].map(num => (
-                <Star 
-                  key={num} 
-                  size={32} 
-                  onClick={() => setReseña({...reseña, rating: num})}
-                  className={`cursor-pointer ${reseña.rating >= num ? 'fill-yellow-400 text-yellow-400' : 'text-gray-300'}`} 
-                />
-              ))}
-            </div>
-            <textarea 
-              placeholder="Escribe un recuerdo..."
-              className="w-full p-4 rounded-xl border mb-4 h-32 focus:ring-2 focus:ring-[#e57373] outline-none text-black" 
-              onChange={(e) => setReseña({...reseña, comentario: e.target.value})} 
-            />
-            <button onClick={guardarReseña} className="w-full bg-[#e57373] text-white py-4 rounded-2xl font-bold shadow-lg">
-              Guardar en Recuerdos
-            </button>
-          </motion.div>
+          <div className="w-full bg-white p-6 rounded-3xl">
+            <h2 className="text-xl font-bold mb-4">¿Qué tal estuvo?</h2>
+            <textarea className="w-full p-4 border rounded-xl mb-4" onChange={(e) => setReseña({...reseña, comentario: e.target.value})} />
+            <button onClick={guardarReseña} className="w-full bg-[#e57373] text-white py-4 rounded-2xl">Guardar</button>
+          </div>
         )}
       </div>
     </div>
