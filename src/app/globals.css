@@ -1,0 +1,29 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background: #fdfbf7; /* Crema */
+  --primary: #e57373;    /* Rojo aesthetic */
+  --secondary: #2d2d2d;  /* Gris oscuro */
+}
+
+body {
+  background-color: var(--background);
+  color: var(--secondary);
+  font-family: 'Inter', sans-serif;
+  min-height: 100vh;
+}
+
+/* Efecto Glassmorphism */
+.glass {
+  background: rgba(255, 255, 255, 0.4);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 24px;
+}
+
+.btn-primary {
+  @apply bg-[#e57373] hover:bg-[#d32f2f] text-white font-bold py-3 px-6 rounded-full transition-all shadow-lg active:scale-95;
+}
