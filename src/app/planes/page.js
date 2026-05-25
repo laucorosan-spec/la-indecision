@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react';
 import { Trash2, Edit2, Sparkles, Plus, Lightbulb } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { supabase } from '../../lib/supabase'; // Importamos el puente
 
 export default function RegistroPlanes() {
   const [planes, setPlanes] = useState([]);
@@ -9,156 +10,103 @@ export default function RegistroPlanes() {
   const [ubicacion, setUbicacion] = useState('');
   const [categoria, setCategoria] = useState('hoy');
   const [editandoId, setEditandoId] = useState(null);
-  
-  // Estados para la IA
-  const [sugerencia, setSugerencia] = useState(null);
   const [pensando, setPensando] = useState(false);
+  const [sugerencia, setSugerencia] = useState(null);
 
+  // Función para cargar planes desde Supabase
+  const cargarPlanes = async () => {
+    const { data, error } = await supabase
+      .from('planes')
+      .select('*')
+      .eq('hecho', false) // Solo los que no están hechos
+      .order('created_at', { ascending: false });
+    
+    if (data) setPlanes(data);
+  };
+
+  useEffect(() => {
+    cargarPlanes();
+  }, []);
+
+  const guardarPlan = async (e) => {
+    e.preventDefault();
+    if (editandoId) {
+      await supabase.from('planes').update({ nombre, ubicacion, categoria }).eq('id', editandoId);
+      setEditandoId(null);
+    } else {
+      await supabase.from('planes').insert([{ nombre, ubicacion, categoria, hecho: false }]);
+    }
+    setNombre(''); setUbicacion('');
+    cargarPlanes();
+  };
+
+  const eliminarPlan = async (id) => {
+    if (confirm("¿Borrar este plan?")) {
+      await supabase.from('planes').delete().eq('id', id);
+      cargarPlanes();
+    }
+  };
+
+  // ... (Aquí van las funciones de sugerenciasIA que ya tenías, son iguales)
   const sugerenciasIA = [
     { nombre: "Cata de vinos a ciegas en casa", ubicacion: "Salón", categoria: "hoy" },
     { nombre: "Pícnic nocturno para ver las estrellas", ubicacion: "Parque cercano", categoria: "futuro" },
-    { nombre: "Sesión de fotos estilo 'Old Money' en el centro", ubicacion: "Centro ciudad", categoria: "futuro" },
-    { nombre: "Noche de cocina: solo ingredientes rojos", ubicacion: "Cocina", categoria: "hoy" },
-    { nombre: "Pintar un cuadro conjunto (uno cada mitad)", ubicacion: "Casa", categoria: "hoy" },
-    { nombre: "Ruta por las cafeterías más aesthetic", ubicacion: "Ciudad", categoria: "futuro" },
-    { nombre: "Maratón de pelis de vuestra infancia", ubicacion: "Sofá", categoria: "hoy" },
-    { nombre: "Ir a un anticuario y comprar algo raro", ubicacion: "Barrio antiguo", categoria: "futuro" },
-    { nombre: "Hacer vuestra propia pizza desde cero", ubicacion: "Cocina", categoria: "hoy" },
-    { nombre: "Visitar un pueblo en el que nunca hayáis estado", ubicacion: "Alrededores", categoria: "futuro" }
+    { nombre: "Noche de cocina: solo ingredientes rojos", ubicacion: "Cocina", categoria: "hoy" }
   ];
 
-  useEffect(() => {
-    const guardados = JSON.parse(localStorage.getItem('planes') || '[]');
-    setPlanes(guardados);
-  }, []);
-
   const generarSugerencia = () => {
-    setPensando(true);
-    setSugerencia(null);
+    setPensando(true); setSugerencia(null);
     setTimeout(() => {
-      const random = sugerenciasIA[Math.floor(Math.random() * sugerenciasIA.length)];
-      setSugerencia(random);
+      setSugerencia(sugerenciasIA[Math.floor(Math.random() * sugerenciasIA.length)]);
       setPensando(false);
     }, 1500);
   };
 
-  const añadirSugerencia = () => {
-    const nuevo = { id: Date.now(), ...sugerencia, hecho: false };
-    const nuevosPlanes = [...planes, nuevo];
-    localStorage.setItem('planes', JSON.stringify(nuevosPlanes));
-    setPlanes(nuevosPlanes);
+  const añadirSugerencia = async () => {
+    await supabase.from('planes').insert([{ ...sugerencia, hecho: false }]);
     setSugerencia(null);
-    alert("¡Sugerencia añadida a vuestra lista! ✨");
-  };
-
-  const guardarPlan = (e) => {
-    e.preventDefault();
-    let nuevosPlanes;
-    if (editandoId) {
-      nuevosPlanes = planes.map(p => p.id === editandoId ? { ...p, nombre, ubicacion, categoria } : p);
-      setEditandoId(null);
-    } else {
-      const nuevo = { id: Date.now(), nombre, ubicacion, categoria, hecho: false };
-      nuevosPlanes = [...planes, nuevo];
-    }
-    localStorage.setItem('planes', JSON.stringify(nuevosPlanes));
-    setPlanes(nuevosPlanes);
-    setNombre(''); setUbicacion('');
-  };
-
-  const eliminarPlan = (id) => {
-    if (confirm("¿Borrar este plan?")) {
-      const filtrados = planes.filter(p => p.id !== id);
-      localStorage.setItem('planes', JSON.stringify(filtrados));
-      setPlanes(filtrados);
-    }
+    cargarPlanes();
   };
 
   return (
     <div className="flex flex-col gap-8 pb-20">
-      <h1 className="text-3xl font-bold text-[#e57373]">Planes</h1>
-
-      {/* SECCIÓN DE IA */}
-      <div className="relative overflow-hidden glass p-6 border-2 border-purple-200">
-        <div className="flex items-center gap-2 mb-4">
-          <Sparkles className="text-purple-500" size={20} />
-          <h2 className="font-bold text-gray-700">Inspiración IA</h2>
-        </div>
-
-        {!sugerencia && !pensando && (
-          <button 
-            onClick={generarSugerencia}
-            className="w-full py-4 bg-gradient-to-r from-purple-50 to-pink-50 rounded-2xl border border-purple-100 text-purple-600 font-bold text-sm flex items-center justify-center gap-2 hover:shadow-md transition"
-          >
-            <Lightbulb size={16} /> Generar idea mágica
-          </button>
-        )}
-
-        {pensando && (
-          <div className="py-4 text-center">
-            <motion.div 
-              animate={{ opacity: [0.4, 1, 0.4] }} 
-              transition={{ repeat: Infinity, duration: 1.5 }}
-              className="text-purple-400 font-medium text-sm"
-            >
-              Consultando a las estrellas... ✨
-            </motion.div>
+      <h1 className="text-3xl font-bold text-[#e57373]">Planes Compartidos</h1>
+      
+      {/* Sección IA */}
+      <div className="glass p-6 border-2 border-purple-200">
+        <button onClick={generarSugerencia} className="w-full py-3 bg-purple-50 text-purple-600 rounded-xl font-bold flex items-center justify-center gap-2">
+          <Lightbulb size={16} /> Inspiración IA
+        </button>
+        {sugerencia && (
+          <div className="mt-4 p-4 bg-white/60 rounded-xl border border-purple-200">
+            <p className="font-bold">{sugerencia.nombre}</p>
+            <button onClick={añadirSugerencia} className="mt-2 w-full py-2 bg-purple-500 text-white rounded-lg text-xs font-bold">Añadir a la lista común</button>
           </div>
         )}
-
-        <AnimatePresence>
-          {sugerencia && (
-            <motion.div 
-              initial={{ opacity: 0, y: 10 }} 
-              animate={{ opacity: 1, y: 0 }}
-              className="bg-white/60 p-4 rounded-2xl border border-purple-200"
-            >
-              <p className="text-xs font-bold text-purple-400 uppercase mb-1">Sugerencia para vosotros:</p>
-              <h3 className="text-lg font-bold text-gray-800 mb-1">{sugerencia.nombre}</h3>
-              <p className="text-xs text-gray-500 mb-4 italic">📍 {sugerencia.ubicacion}</p>
-              <div className="flex gap-2">
-                <button onClick={añadirSugerencia} className="flex-1 py-2 bg-purple-500 text-white rounded-xl text-xs font-bold flex items-center justify-center gap-1">
-                  <Plus size={14} /> Añadir a mi lista
-                </button>
-                <button onClick={() => setSugerencia(null)} className="px-4 py-2 text-gray-400 text-xs">Descartar</button>
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
       </div>
 
-      {/* FORMULARIO MANUAL */}
-      <div>
-        <h2 className="font-bold text-gray-700 mb-4 flex items-center gap-2">
-            {editandoId ? "Editar Plan" : "Añadir manualmente"}
-        </h2>
-        <form onSubmit={guardarPlan} className="glass p-6 flex flex-col gap-4">
-          <input placeholder="¿Qué vamos a hacer?" className="p-3 rounded-xl bg-white/50 outline-none" value={nombre} onChange={(e) => setNombre(e.target.value)} required />
-          <input placeholder="¿Dónde? (opcional)" className="p-3 rounded-xl bg-white/50 outline-none" value={ubicacion} onChange={(e) => setUbicacion(e.target.value)} />
-          <select className="p-3 rounded-xl bg-white/50 outline-none" value={categoria} onChange={(e) => setCategoria(e.target.value)}>
-            <option value="hoy">Para hoy</option>
-            <option value="futuro">Más adelante</option>
-          </select>
-          <button type="submit" className="btn-primary">
-            {editandoId ? "Actualizar" : "Guardar Plan"}
-          </button>
-        </form>
-      </div>
+      {/* Formulario */}
+      <form onSubmit={guardarPlan} className="glass p-6 flex flex-col gap-4">
+        <input placeholder="¿Qué vamos a hacer?" className="p-3 rounded-xl bg-white/50 outline-none" value={nombre} onChange={(e) => setNombre(e.target.value)} required />
+        <input placeholder="¿Dónde?" className="p-3 rounded-xl bg-white/50 outline-none" value={ubicacion} onChange={(e) => setUbicacion(e.target.value)} />
+        <select className="p-3 rounded-xl bg-white/50 outline-none" value={categoria} onChange={(e) => setCategoria(e.target.value)}>
+          <option value="hoy">Hoy</option>
+          <option value="futuro">Futuro</option>
+        </select>
+        <button type="submit" className="btn-primary">{editandoId ? "Actualizar" : "Guardar para los dos"}</button>
+      </form>
 
-      {/* LISTA EDITABLE */}
+      {/* Lista */}
       <div className="flex flex-col gap-3">
-        <h2 className="font-bold text-gray-700">Planes Pendientes</h2>
-        {planes.filter(p => !p.hecho).map(plan => (
+        {planes.map(plan => (
           <div key={plan.id} className="glass p-4 flex justify-between items-center group">
-            <div className="flex-1">
-              <p className="font-bold text-gray-800 leading-tight">{plan.nombre}</p>
-              <p className="text-[10px] text-gray-400 font-bold uppercase mt-1">
-                {plan.categoria === 'hoy' ? '🔥 Hoy' : '🗓️ Futuro'} • {plan.ubicacion}
-              </p>
+            <div>
+              <p className="font-bold text-gray-800">{plan.nombre}</p>
+              <p className="text-[10px] text-gray-400 uppercase font-bold">{plan.categoria} • {plan.ubicacion}</p>
             </div>
-            <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-              <button onClick={() => { setNombre(plan.nombre); setUbicacion(plan.ubicacion); setCategoria(plan.categoria); setEditandoId(plan.id); window.scrollTo(0,0); }} className="p-2 text-blue-400"><Edit2 size={16} /></button>
-              <button onClick={() => eliminarPlan(plan.id)} className="p-2 text-red-300"><Trash2 size={16} /></button>
+            <div className="flex gap-2">
+              <button onClick={() => {setNombre(plan.nombre); setUbicacion(plan.ubicacion); setCategoria(plan.categoria); setEditandoId(plan.id);}} className="text-blue-400"><Edit2 size={16}/></button>
+              <button onClick={() => eliminarPlan(plan.id)} className="text-red-300"><Trash2 size={16}/></button>
             </div>
           </div>
         ))}
