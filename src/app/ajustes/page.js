@@ -147,3 +147,52 @@ export default function Ajustes() {
     </div>
   );
 }
+"use client";
+import { useState, useEffect } from 'react';
+import { Moon, Sun, Heart, Award, Calendar } from 'lucide-react';
+// ... otros imports
+
+export default function Ajustes() {
+  const [darkMode, setDarkMode] = useState(false);
+
+  useEffect(() => {
+    // Ver si el modo oscuro ya estaba activado
+    if (document.documentElement.classList.contains('dark')) {
+      setDarkMode(true);
+    }
+  }, []);
+
+  const toggleDarkMode = () => {
+    if (darkMode) {
+      document.documentElement.classList.remove('dark');
+      localStorage.setItem('theme', 'light');
+      setDarkMode(false);
+    } else {
+      document.documentElement.classList.add('dark');
+      localStorage.setItem('theme', 'dark');
+      setDarkMode(true);
+    }
+  };
+
+  return (
+    <div className="flex flex-col gap-6">
+      <h1 className="text-3xl font-bold text-[#e57373] text-center">Nuestro Rincón</h1>
+
+      {/* Botón de Modo Oscuro */}
+      <div className="glass p-6 flex justify-between items-center">
+        <div className="flex items-center gap-3">
+          {darkMode ? <Moon className="text-purple-400" /> : <Sun className="text-yellow-500" />}
+          <span className="font-bold">Modo Oscuro</span>
+        </div>
+        <button 
+          onClick={toggleDarkMode}
+          className={`w-14 h-8 rounded-full transition-colors relative ${darkMode ? 'bg-purple-600' : 'bg-gray-300'}`}
+        >
+          <div className={`absolute top-1 w-6 h-6 bg-white rounded-full transition-all ${darkMode ? 'left-7' : 'left-1'}`}></div>
+        </button>
+      </div>
+
+      {/* ... Resto de tu código de Ajustes (Estadísticas, nombres, etc.) ... */}
+    </div>
+  );
+}
