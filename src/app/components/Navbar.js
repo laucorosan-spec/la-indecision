@@ -13,15 +13,15 @@ export default function Navbar() {
   ];
 
   return (
-    <div className="fixed bottom-6 left-0 right-0 flex justify-center z-50 pointer-events-none">
-      <nav className="bg-white/90 backdrop-blur-xl px-8 py-4 flex gap-10 rounded-full shadow-2xl border border-white/50 pointer-events-auto">
+    <div className="fixed bottom-8 left-0 right-0 flex justify-center z-50">
+      <nav className="glass px-8 py-4 flex gap-10 shadow-2xl">
         {links.map((item) => {
           const Icon = item.icon;
           const active = pathname === item.href;
           return (
             <Link key={item.href} href={item.href} className="relative transition-transform active:scale-90">
-              <Icon size={26} className={active ? 'text-[#e57373]' : 'text-gray-300'} />
-              {active && <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-1.5 h-1.5 bg-[#e57373] rounded-full shadow-sm" />}
+              <Icon size={24} className={active ? 'text-[#e57373]' : 'text-gray-400'} />
+              {active && <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-1 h-1 bg-[#e57373] rounded-full" />}
             </Link>
           );
         })}
