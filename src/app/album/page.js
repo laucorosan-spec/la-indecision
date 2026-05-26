@@ -55,4 +55,14 @@ export default function Album() {
       ))}
     </div>
   );
+<div className="flex text-yellow-500 mb-1">
+  {[...Array(5)].map((_, i) => (
+    <Star 
+      key={i} 
+      size={14} 
+      fill={i < (plan.rating || 0) ? "currentColor" : "none"} 
+      stroke="currentColor" 
+    />
+  ))}
+</div>
 }
