@@ -2,44 +2,33 @@
 @tailwind components;
 @tailwind utilities;
 
-:root {
-  --bg: #fdfbf7;
-  --primary: #e57373;
-  --glass: rgba(255, 255, 255, 0.7);
-}
-
 body {
-  background-color: var(--bg);
-  color: #4a4a4a;
-  font-family: 'Inter', sans-serif;
+  background-color: #fdfbf7;
+  color: #2d2d2d;
+  margin: 0;
+  padding: 0;
+  overflow-x: hidden;
 }
 
 .glass-card {
-  background: var(--glass);
+  background: rgba(255, 255, 255, 0.7);
   backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
   border-radius: 30px;
-  border: 1px solid rgba(255, 255, 255, 0.3);
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.03);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.03);
 }
 
 .btn-coral {
-  background-color: var(--primary);
+  background-color: #e57373;
   color: white;
-  font-weight: 700;
-  padding: 14px 28px;
-  border-radius: 20px;
+  padding: 16px;
+  border-radius: 25px;
+  box-shadow: 0 10px 20px rgba(229, 115, 115, 0.3);
   border: none;
-  cursor: pointer;
-  box-shadow: 0 8px 20px rgba(229, 115, 115, 0.4);
-  transition: all 0.3s ease;
+  transition: all 0.2s;
 }
 
-.btn-coral:hover {
-  transform: translateY(-2px);
-  filter: brightness(1.05);
-}
-
-.btn-coral:active {
-  transform: scale(0.96);
+/* Evita que el botón sea gigante en PC */
+.btn-coral {
+  width: 100%;
+  max-width: 320px;
 }
