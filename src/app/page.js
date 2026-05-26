@@ -35,7 +35,7 @@ export default function Home() {
 
   const girarRuleta = () => {
     const posibles = planes.filter(p => p.categoria === filtro);
-    if (posibles.length === 0) return alert("¡Añade algún plan primero! ✨");
+    if (posibles.length === 0) return alert("¡Añade un plan primero!");
     setGirando(true);
     setSeleccionado(null);
     setPaso('ruleta');
@@ -43,7 +43,7 @@ export default function Home() {
       const elegido = posibles[Math.floor(Math.random() * posibles.length)];
       setSeleccionado(elegido);
       setGirando(false);
-      confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 } });
+      confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
     }, 2000);
   };
 
@@ -52,57 +52,53 @@ export default function Home() {
     if (!error) {
       setSeleccionado(null);
       cargarDatos();
-      alert("¡Recuerdo guardado! ❤️");
+      alert("¡Plan completado! ❤️");
     }
   };
 
   return (
-    <div className="min-h-screen flex flex-col items-center px-4 pt-6 pb-24 max-w-md mx-auto">
+    <div className="flex flex-col items-center gap-8 px-6 pt-10 pb-32 max-w-md mx-auto">
       
-      {/* Dashboard de Stats - Estilo Grupal */}
-      <div className="glass w-full py-4 px-6 flex justify-between items-center mb-8">
+      {/* Dashboard Stats - Pequeño y elegante */}
+      <div className="glass w-full flex justify-around py-4">
         <div className="flex flex-col items-center">
-          <Calendar size={16} className="text-blue-400 mb-1" />
-          <span className="text-sm font-bold">{stats.dias}d</span>
-          <span className="text-[10px] opacity-50 uppercase">Juntos</span>
+          <Calendar size={16} className="text-blue-400 opacity-70 mb-1" />
+          <span className="text-lg font-bold">{stats.dias}</span>
+          <span className="text-[10px] uppercase opacity-40 font-black">Días</span>
         </div>
-        <div className="w-[1px] h-8 bg-gray-200 dark:bg-gray-700"></div>
         <div className="flex flex-col items-center">
-          <Heart size={16} className="text-red-400 mb-1" />
-          <span className="text-sm font-bold">{stats.creados}</span>
-          <span className="text-[10px] opacity-50 uppercase">Planes</span>
+          <Heart size={16} className="text-red-400 opacity-70 mb-1" />
+          <span className="text-lg font-bold">{stats.creados}</span>
+          <span className="text-[10px] uppercase opacity-40 font-black">Planes</span>
         </div>
-        <div className="w-[1px] h-8 bg-gray-200 dark:bg-gray-700"></div>
         <div className="flex flex-col items-center">
-          <Trophy size={16} className="text-yellow-400 mb-1" />
-          <span className="text-sm font-bold">{stats.hechos}</span>
-          <span className="text-[10px] opacity-50 uppercase">Hechos</span>
+          <Trophy size={16} className="text-yellow-400 opacity-70 mb-1" />
+          <span className="text-lg font-bold">{stats.hechos}</span>
+          <span className="text-[10px] uppercase opacity-40 font-black">Hechos</span>
         </div>
       </div>
 
-      <h1 className="text-4xl font-black text-[#e57373] mb-8 tracking-tighter text-center">
-        LA INDECISIÓN
-      </h1>
+      <h1 className="text-4xl font-black text-[#e57373] tracking-tighter">La Indecisión</h1>
       
-      {/* Selector de categoría pill-style */}
-      <div className="glass p-1 w-full flex mb-10">
-        <button onClick={() => setFiltro('hoy')} className={`flex-1 py-3 rounded-2xl text-xs font-black transition ${filtro === 'hoy' ? 'bg-[#e57373] text-white shadow-lg' : 'opacity-40'}`}>
+      {/* Filtros */}
+      <div className="glass p-1 w-full flex">
+        <button onClick={() => setFiltro('hoy')} className={`flex-1 py-3 rounded-2xl text-[10px] font-black transition ${filtro === 'hoy' ? 'bg-[#e57373] text-white shadow-lg' : 'opacity-40'}`}>
           PARA HOY
         </button>
-        <button onClick={() => setFiltro('futuro')} className={`flex-1 py-3 rounded-2xl text-xs font-black transition ${filtro === 'futuro' ? 'bg-[#e57373] text-white shadow-lg' : 'opacity-40'}`}>
+        <button onClick={() => setFiltro('futuro')} className={`flex-1 py-3 rounded-2xl text-[10px] font-black transition ${filtro === 'futuro' ? 'bg-[#e57373] text-white shadow-lg' : 'opacity-40'}`}>
           MÁS ADELANTE
         </button>
       </div>
 
-      {/* LA RULETA - Grande y circular */}
-      <div className="relative mb-12">
-        <div className="absolute -inset-4 bg-red-400/10 rounded-full blur-2xl"></div>
+      {/* LA RULETA - Tamaño Grande y Profesional */}
+      <div className="relative py-4">
         <motion.div
           animate={girando ? { rotate: 3600 } : { rotate: 0 }}
           transition={{ duration: 2, ease: "circOut" }}
-          className="w-72 h-72 rounded-full border-[10px] border-white dark:border-zinc-800 border-dashed flex items-center justify-center bg-white dark:bg-zinc-900 shadow-2xl relative z-10"
+          className="w-64 h-64 rounded-full border-[6px] border-[#e57373] border-dashed flex items-center justify-center bg-white dark:bg-zinc-900 shadow-2xl relative"
         >
-          <div className="text-7xl">{girando ? "💫" : "🎡"}</div>
+          <div className="absolute inset-2 border border-[#e57373]/20 rounded-full"></div>
+          <span className="text-6xl drop-shadow-md">{girando ? "💫" : "🎡"}</span>
         </motion.div>
       </div>
 
@@ -110,36 +106,36 @@ export default function Home() {
         {girando ? "Decidiendo..." : "Girar Ruleta"}
       </button>
 
-      {/* Pop-up de Resultado */}
+      {/* Resultado Flotante */}
       <AnimatePresence>
         {seleccionado && !girando && (
-          <motion.div initial={{ opacity: 0, y: 100 }} animate={{ opacity: 1, y: 0 }} className="fixed inset-x-4 bottom-24 z-50">
+          <motion.div initial={{ y: 50, opacity: 0 }} animate={{ y: 0, opacity: 1 }} className="fixed inset-x-6 bottom-32 z-50">
             <div className="glass p-8 text-center shadow-2xl border-t-4 border-[#e57373]">
               {paso === 'ruleta' ? (
                 <>
-                  <p className="text-xs font-bold text-[#e57373] mb-2 uppercase tracking-widest">Plan Elegido</p>
-                  <h2 className="text-3xl font-black mb-8">{seleccionado.nombre}</h2>
+                  <p className="text-[10px] font-black text-[#e57373] mb-1 uppercase tracking-widest">El destino dice...</p>
+                  <h2 className="text-3xl font-bold mb-8 tracking-tight">{seleccionado.nombre}</h2>
                   <div className="flex gap-3">
-                    <button onClick={() => setSeleccionado(null)} className="flex-1 py-4 bg-gray-100 dark:bg-zinc-800 rounded-2xl font-bold text-xs">PASAR</button>
-                    <button onClick={() => setPaso('reseña')} className="flex-[2] py-4 bg-green-500 text-white rounded-2xl font-bold text-xs shadow-lg shadow-green-200">¡LO HEMOS HECHO!</button>
+                    <button onClick={() => setSeleccionado(null)} className="flex-1 py-4 bg-gray-100 dark:bg-zinc-800 rounded-2xl font-bold text-xs uppercase">Pasar</button>
+                    <button onClick={() => setPaso('reseña')} className="flex-1 py-4 bg-green-500 text-white rounded-2xl font-bold text-xs uppercase shadow-lg">¡Aceptar!</button>
                   </div>
                 </>
               ) : (
                 <div className="flex flex-col gap-5">
-                  <h2 className="text-xl font-black">¿Qué tal estuvo?</h2>
+                  <h2 className="text-xl font-bold italic">¿Qué tal estuvo?</h2>
                   <div className="flex justify-center gap-1">
                     {[1, 2, 3, 4, 5].map((s) => (
                       <button key={s} onClick={() => setRating(s)} className="p-1 transform active:scale-125 transition">
-                        <Star size={32} fill={s <= rating ? "#fbbf24" : "none"} stroke={s <= rating ? "#fbbf24" : "#ccc"} />
+                        <Star size={30} fill={s <= rating ? "#fbbf24" : "none"} stroke={s <= rating ? "#fbbf24" : "#ccc"} />
                       </button>
                     ))}
                   </div>
                   <textarea 
-                    className="w-full p-4 rounded-2xl bg-gray-50 dark:bg-black/20 border-none outline-none text-sm h-28"
-                    placeholder="Escribe un recuerdo corto de este día..."
+                    className="w-full p-4 rounded-2xl bg-gray-50 dark:bg-black/20 border-none outline-none text-sm h-24"
+                    placeholder="Escribe un recuerdo..."
                     value={comentario} onChange={(e) => setComentario(e.target.value)}
                   />
-                  <button onClick={guardarReseña} className="btn-primary w-full">Guardar en el Álbum ❤️</button>
+                  <button onClick={guardarReseña} className="btn-primary w-full">Guardar Recuerdo ❤️</button>
                 </div>
               )}
             </div>
