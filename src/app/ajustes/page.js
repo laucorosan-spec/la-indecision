@@ -1,6 +1,6 @@
 "use client";
 import { useState, useEffect } from 'react';
-import { Heart, Calendar, Moon, Sun, Save } from 'lucide-react';
+import { Heart, Calendar, Moon, Sun, Save, User } from 'lucide-react';
 
 export default function Ajustes() {
   const [nombre, setNombre] = useState('Pareja Indecisa');
@@ -8,15 +8,26 @@ export default function Ajustes() {
   const [darkMode, setDarkMode] = useState(false);
 
   useEffect(() => {
+    // Cargar datos guardados
     setNombre(localStorage.getItem('usuario-nombre') || 'Pareja Indecisa');
     setFechaInicio(localStorage.getItem('aniversario') || '');
-    // Comprobar si ya estaba el modo oscuro activo
-    if (document.documentElement.classList.contains('dark')) setDarkMode(true);
+    
+    // Comprobar si el modo oscuro ya estaba activo
+    if (document.documentElement.classList.contains('dark')) {
+      setDarkMode(true);
+    }
   }, []);
 
   const toggleDarkMode = () => {
-    setDarkMode(!darkMode);
-    document.documentElement.classList.toggle('dark');
+    const newMode = !darkMode;
+    setDarkMode(newMode);
+    if (newMode) {
+      document.documentElement.classList.add('dark');
+      localStorage.setItem('theme', 'dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+      localStorage.setItem('theme', 'light');
+    }
   };
 
   const guardarTodo = () => {
@@ -27,44 +38,58 @@ export default function Ajustes() {
 
   return (
     <div className="flex flex-col gap-6 pb-24">
-      <h1 className="text-2xl font-bold">Nuestros Ajustes</h1>
+      <h1 className="text-2xl font-bold mt-4">Ajustes</h1>
 
       <div className="glass p-6 flex flex-col gap-6">
-        {/* Toggle Modo Oscuro */}
-        <div className="flex justify-between items-center">
-          <span className="flex items-center gap-2 font-medium">
-            {darkMode ? <Moon size={20} /> : <Sun size={20} />} Modo Noche
-          </span>
+        {/* Switch de Modo Oscuro */}
+        <div className="flex justify-between items-center p-2">
+          <div className="flex items-center gap-3">
+            {darkMode ? <Moon className="text-purple-400" /> : <Sun className="text-yellow-500" />}
+            <span className="font-medium text-lg">Modo Noche</span>
+          </div>
           <button 
             onClick={toggleDarkMode}
-            className={`w-12 h-6 rounded-full transition-colors ${darkMode ? 'bg-red-500' : 'bg-gray-300'} relative`}
+            className={`w-14 h-7 rounded-full transition-colors ${darkMode ? 'bg-red-500' : 'bg-gray-300'} relative`}
           >
-            <div className={`absolute top-1 w-4 h-4 bg-white rounded-full transition-all ${darkMode ? 'left-7' : 'left-1'}`} />
+            <div className={`absolute top-1 w-5 h-5 bg-white rounded-full transition-all ${darkMode ? 'left-8' : 'left-1'}`} />
           </button>
         </div>
 
-        {/* Nombre */}
+        <hr className="border-white/10" />
+
+        {/* Campo Nombre */}
         <div className="flex flex-col gap-2">
-          <label className="text-xs text-gray-400 font-bold uppercase ml-1">Vuestro Nombre</label>
+          <label className="text-xs text-gray-400 font-bold uppercase ml-1 flex items-center gap-1">
+            <User size={14} /> Vuestro Nombre
+          </label>
           <input 
-            className="p-3 rounded-xl bg-white/10 border border-white/20 outline-none"
-            value={nombre} onChange={(e) => setNombre(e.target.value)}
+            className="p-3 rounded-xl bg-white/5 border border-white/10 outline-none focus:border-red-400 transition-colors"
+            value={nombre} 
+            onChange={(e) => setNombre(e.target.value)}
           />
         </div>
 
-        {/* Fecha Aniversario */}
+        {/* Campo Aniversario */}
         <div className="flex flex-col gap-2">
-          <label className="text-xs text-gray-400 font-bold uppercase ml-1">Fecha de Aniversario</label>
+          <label className="text-xs text-gray-400 font-bold uppercase ml-1 flex items-center gap-1">
+            <Calendar size={14} /> Fecha de Aniversario
+          </label>
           <input 
             type="date"
-            className="p-3 rounded-xl bg-white/10 border border-white/20 outline-none"
-            value={fechaInicio} onChange={(e) => setFechaInicio(e.target.value)}
+            className="p-3 rounded-xl bg-white/5 border border-white/10 outline-none focus:border-red-400 transition-colors"
+            value={fechaInicio} 
+            onChange={(e) => setFechaInicio(e.target.value)}
           />
         </div>
 
-        <button onClick={guardarTodo} className="btn-primary w-full flex items-center justify-center gap-2">
+        <button onClick={guardarTodo} className="btn-primary w-full flex items-center justify-center gap-2 mt-4">
           <Save size={18} /> Guardar Cambios
         </button>
+      </div>
+
+      <div className="text-center">
+        <Heart className="mx-auto text-red-500 animate-pulse" fill="currentColor" />
+        <p className="text-[10px] text-gray-500 mt-2 uppercase tracking-widest">Creado para vuestros momentos</p>
       </div>
     </div>
   );
