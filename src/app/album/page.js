@@ -1,44 +1,58 @@
 "use client";
 import { useState, useEffect } from 'react';
-import { Calendar, MapPin, Star } from 'lucide-react';
-import { supabase } from '../../lib/supabase';
+import { supabase } from '@/lib/supabase';
+import { Star } from 'lucide-react'; // Necesitas instalar lucide-react o usar un emoji
 
 export default function Album() {
   const [planes, setPlanes] = useState([]);
+  const [cargando, setCargando] = useState(true);
 
-  const cargarRecuerdos = async () => {
-    const { data } = await supabase
-      .from('planes')
-      .select('*')
-      .eq('hecho', true)
-      .order('fecha', { ascending: false });
-    
-    if (data) setPlanes(data);
-  };
+  useEffect(() => {
+    const cargarHistorial = async () => {
+      const { data, error } = await supabase
+        .from('planes')
+        .select('*')
+        .eq('hecho', true)
+        .order('created_at', { ascending: false });
 
-  useEffect(() => { cargarRecuerdos(); }, []);
+      if (!error) setPlanes(data);
+      setCargando(false);
+    };
+    cargarHistorial();
+  }, []);
 
   return (
     <div className="flex flex-col gap-6">
-      <h1 className="text-3xl font-bold text-[#e57373] text-center">Nuestro Álbum</h1>
-      <div className="grid grid-cols-1 gap-8">
-        {planes.map(plan => (
-          <div key={plan.id} className="bg-white p-4 shadow-xl transform rotate-1 hover:rotate-0 transition-all">
-            <div className="relative w-full aspect-square bg-gray-100 mb-4 overflow-hidden rounded-sm">
-              <img src={plan.foto || 'https://via.placeholder.com/400'} className="w-full h-full object-cover" />
-              <div className="absolute top-2 right-2 bg-white/90 px-2 py-1 rounded-full flex items-center gap-1">
-                <Star className="w-3 h-3 text-yellow-500 fill-yellow-500" />
-                <span className="text-xs font-bold">{plan.rating}</span>
+      <h1 className="text-2xl font-bold text-[#e57373]">Nuestro Álbum</h1>
+      
+      {planes.map(plan => (
+        <div key={plan.id} className="glass p-5 flex flex-col gap-3">
+          {/* Si algún día subes fotos, aquí iría la imagen */}
+          {plan.foto && <img src={plan.foto} className="rounded-xl w-full h-48 object-cover" alt="Recuerdo" />}
+          
+          <div>
+            <div className="flex justify-between items-start">
+              <h3 className="font-bold text-lg">{plan.nombre}</h3>
+              <div className="flex text-yellow-500">
+                {/* Dibujamos tantas estrellas como diga el rating */}
+                {[...Array(plan.rating || 0)].map((_, i) => <Star key={i} size={16} fill="currentColor" />)}
               </div>
             </div>
-            <h3 className="font-bold text-xl">{plan.nombre}</h3>
-            <p className="text-xs text-gray-500 flex items-center gap-1"><MapPin size={12}/> {plan.ubicacion} • <Calendar size={12}/> {plan.fecha}</p>
-            <div className="mt-2 p-3 bg-gray-50 rounded-lg italic text-sm text-gray-700 border-l-4 border-[#e57373]">
-              "{plan.comentario || 'Un día increíble...'}"
-            </div>
+            <p className="text-sm text-gray-500">📍 {plan.ubicacion}</p>
           </div>
-        ))}
-      </div>
+
+          {plan.comentario && (
+            <p className="text-sm italic text-gray-600 bg-white/30 p-3 rounded-lg">
+              "{plan.comentario}"
+            </p>
+          )}
+
+          <div className="text-[10px] text-gray-400 flex justify-between">
+            <span>{plan.fecha ? `Fecha: ${plan.fecha}` : 'Sin fecha'}</span>
+            <span>Añadido el {new Date(plan.created_at).toLocaleDateString()}</span>
+          </div>
+        </div>
+      ))}
     </div>
   );
 }
