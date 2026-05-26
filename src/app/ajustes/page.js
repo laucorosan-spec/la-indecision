@@ -1,85 +1,71 @@
 "use client";
-
 import { useState, useEffect } from 'react';
-import { Moon, Sun, Heart, Award, Calendar, User, Save } from 'lucide-react';
-import { supabase } from '@/lib/supabase';
+import { Heart, Calendar, Moon, Sun, Save } from 'lucide-react';
 
 export default function Ajustes() {
   const [nombre, setNombre] = useState('Pareja Indecisa');
-  const [cargando, setCargando] = useState(false);
+  const [fechaInicio, setFechaInicio] = useState('');
+  const [darkMode, setDarkMode] = useState(false);
 
-  // Cargamos el nombre guardado al abrir la página
   useEffect(() => {
-    const guardado = localStorage.getItem('usuario-nombre');
-    if (guardado) setNombre(guardado);
+    setNombre(localStorage.getItem('usuario-nombre') || 'Pareja Indecisa');
+    setFechaInicio(localStorage.getItem('aniversario') || '');
+    // Comprobar si ya estaba el modo oscuro activo
+    if (document.documentElement.classList.contains('dark')) setDarkMode(true);
   }, []);
 
-  const guardarPerfil = () => {
-    setCargando(true);
+  const toggleDarkMode = () => {
+    setDarkMode(!darkMode);
+    document.documentElement.classList.toggle('dark');
+  };
+
+  const guardarTodo = () => {
     localStorage.setItem('usuario-nombre', nombre);
-    
-    // Simulamos una carga pequeña para feedback visual
-    setTimeout(() => {
-      setCargando(false);
-      alert("¡Perfil actualizado con éxito! ❤️");
-    }, 500);
+    localStorage.setItem('aniversario', fechaInicio);
+    alert("¡Configuración guardada! ❤️");
   };
 
   return (
-    <div className="flex flex-col gap-6 pb-20">
-      <h1 className="text-2xl font-bold flex items-center gap-2">
-        <Award className="text-[#e57373]" /> Ajustes del Perfil
-      </h1>
+    <div className="flex flex-col gap-6 pb-24">
+      <h1 className="text-2xl font-bold">Nuestros Ajustes</h1>
 
-      <div className="glass p-6 flex flex-col items-center gap-6">
-        {/* Avatar con icono de Corazón */}
-        <div className="relative">
-          <div className="w-24 h-24 bg-[#e57373]/20 rounded-full flex items-center justify-center text-[#e57373]">
-            <Heart size={48} fill="#e57373" />
-          </div>
-          <div className="absolute bottom-0 right-0 bg-white p-1 rounded-full shadow-sm">
-            <Sun size={16} className="text-yellow-500" />
-          </div>
+      <div className="glass p-6 flex flex-col gap-6">
+        {/* Toggle Modo Oscuro */}
+        <div className="flex justify-between items-center">
+          <span className="flex items-center gap-2 font-medium">
+            {darkMode ? <Moon size={20} /> : <Sun size={20} />} Modo Noche
+          </span>
+          <button 
+            onClick={toggleDarkMode}
+            className={`w-12 h-6 rounded-full transition-colors ${darkMode ? 'bg-red-500' : 'bg-gray-300'} relative`}
+          >
+            <div className={`absolute top-1 w-4 h-4 bg-white rounded-full transition-all ${darkMode ? 'left-7' : 'left-1'}`} />
+          </button>
         </div>
 
-        {/* Formulario */}
-        <div className="w-full flex flex-col gap-2">
-          <label className="text-xs font-semibold text-gray-400 uppercase ml-1 flex items-center gap-1">
-            <User size={12} /> Vuestro Nombre
-          </label>
+        {/* Nombre */}
+        <div className="flex flex-col gap-2">
+          <label className="text-xs text-gray-400 font-bold uppercase ml-1">Vuestro Nombre</label>
           <input 
-            className="w-full p-3 rounded-2xl bg-white/50 border border-gray-100 outline-none focus:border-[#e57373] transition-all"
-            value={nombre}
-            onChange={(e) => setNombre(e.target.value)}
-            placeholder="Ej: Alba y Carlos"
+            className="p-3 rounded-xl bg-white/10 border border-white/20 outline-none"
+            value={nombre} onChange={(e) => setNombre(e.target.value)}
           />
         </div>
 
-        <button 
-          onClick={guardarPerfil} 
-          disabled={cargando}
-          className="btn-primary w-full flex items-center justify-center gap-2"
-        >
-          <Save size={18} />
-          {cargando ? "Guardando..." : "Guardar Cambios"}
+        {/* Fecha Aniversario */}
+        <div className="flex flex-col gap-2">
+          <label className="text-xs text-gray-400 font-bold uppercase ml-1">Fecha de Aniversario</label>
+          <input 
+            type="date"
+            className="p-3 rounded-xl bg-white/10 border border-white/20 outline-none"
+            value={fechaInicio} onChange={(e) => setFechaInicio(e.target.value)}
+          />
+        </div>
+
+        <button onClick={guardarTodo} className="btn-primary w-full flex items-center justify-center gap-2">
+          <Save size={18} /> Guardar Cambios
         </button>
       </div>
-
-      {/* Información extra */}
-      <div className="flex flex-col gap-4">
-        <div className="glass p-4 flex items-center gap-4 text-sm">
-          <Calendar className="text-blue-400" />
-          <span>Versión de la App: 1.0.0</span>
-        </div>
-        <div className="glass p-4 flex items-center gap-4 text-sm">
-          <Moon className="text-purple-400" />
-          <span>Modo Noche: Próximamente</span>
-        </div>
-      </div>
-
-      <p className="text-center text-[10px] text-gray-400 mt-4 uppercase tracking-widest">
-        Hecho con amor para personas indecisas
-      </p>
     </div>
   );
 }
