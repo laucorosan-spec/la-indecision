@@ -3,105 +3,151 @@ import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import confetti from 'canvas-confetti';
 import { supabase } from '@/lib/supabase';
-import { Star } from 'lucide-react';
+import { Star } from 'lucide-react'; // Asegúrate de que lucide-react esté instalado
 
 export default function Home() {
   const [planes, setPlanes] = useState([]);
   const [filtro, setFiltro] = useState('hoy'); 
   const [seleccionado, setSeleccionado] = useState(null);
   const [girando, setGirando] = useState(false);
-  const [paso, setPaso] = useState('ruleta'); 
+  
+  // Estados para la reseña
+  const [paso, setPaso] = useState('ruleta'); // 'ruleta' o 'reseña'
   const [rating, setRating] = useState(5);
   const [comentario, setComentario] = useState('');
+  const [enviando, setEnviando] = useState(false);
+
+  const cargarPlanes = async () => {
+    const { data, error } = await supabase
+      .from('planes')
+      .select('*')
+      .eq('hecho', false);
+    if (!error) setPlanes(data);
+  };
 
   useEffect(() => {
-    const cargar = async () => {
-      const { data } = await supabase.from('planes').select('*').eq('hecho', false);
-      if (data) setPlanes(data);
-    };
-    cargar();
+    cargarPlanes();
   }, []);
 
   const girarRuleta = () => {
     const posibles = planes.filter(p => p.categoria === filtro);
-    if (posibles.length === 0) return alert("¡Añade un plan primero! ✨");
+    if (posibles.length === 0) return alert("No hay planes en esta categoría");
+    
     setGirando(true);
     setSeleccionado(null);
     setPaso('ruleta');
+    
     setTimeout(() => {
       const elegido = posibles[Math.floor(Math.random() * posibles.length)];
       setSeleccionado(elegido);
       setGirando(false);
-      confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 } });
+      confetti();
     }, 2000);
   };
 
-  const guardarReseña = async () => {
-    const { error } = await supabase.from('planes').update({ hecho: true, rating, comentario }).eq('id', seleccionado.id);
+  // Función final para guardar todo en Supabase
+  const guardarExperiencia = async () => {
+    setEnviando(true);
+    const { error } = await supabase
+      .from('planes')
+      .update({ 
+        hecho: true, 
+        rating: rating, 
+        comentario: comentario 
+      })
+      .eq('id', seleccionado.id);
+
     if (!error) {
+      alert("¡Recuerdo guardado con éxito! ❤️");
       setSeleccionado(null);
-      alert("¡Plan completado! ❤️");
+      setPaso('ruleta');
+      setComentario('');
+      setRating(5);
+      cargarPlanes();
+    } else {
+      alert("Error al guardar: " + error.message);
     }
+    setEnviando(false);
   };
 
   return (
-    <div className="flex flex-col items-center gap-10 px-6 pt-12 pb-32 max-w-md mx-auto">
-      <h1 className="text-4xl font-black text-[#e57373] tracking-tighter italic">LA INDECISIÓN</h1>
+    <div className="flex flex-col items-center gap-8 pb-10">
+      <h1 className="text-3xl font-bold text-[#e57373] mt-4">La Indecisión</h1>
       
-      <div className="glass p-1 w-full flex">
-        {['hoy', 'futuro'].map((f) => (
-          <button key={f} onClick={() => setFiltro(f)} className={`flex-1 py-3 rounded-2xl text-[10px] font-black transition ${filtro === f ? 'bg-[#e57373] text-white shadow-lg' : 'opacity-40'}`}>
-            {f === 'hoy' ? 'PARA HOY' : 'PRÓXIMAMENTE'}
-          </button>
-        ))}
+      {/* Filtros */}
+      <div className="flex gap-4 glass p-2">
+        <button onClick={() => setFiltro('hoy')} className={`px-4 py-2 rounded-xl transition ${filtro === 'hoy' ? 'bg-[#e57373] text-white' : ''}`}>Hoy</button>
+        <button onClick={() => setFiltro('futuro')} className={`px-4 py-2 rounded-xl transition ${filtro === 'futuro' ? 'bg-[#e57373] text-white' : ''}`}>Más adelante</button>
       </div>
 
-      <div className="relative">
+      {/* Ruleta Animada */}
+      <div className="relative w-64 h-64 flex items-center justify-center">
         <motion.div
           animate={girando ? { rotate: 3600 } : { rotate: 0 }}
           transition={{ duration: 2, ease: "circOut" }}
-          className="w-72 h-72 rounded-full border-[8px] border-[#e57373] border-dashed flex items-center justify-center bg-white dark:bg-zinc-900 shadow-2xl"
+          className="w-full h-full rounded-full border-8 border-[#e57373] border-dashed flex items-center justify-center bg-white shadow-2xl"
         >
-          <span className="text-7xl">{girando ? "💫" : "🎡"}</span>
+          <span className="text-6xl">{girando ? "💫" : "🎡"}</span>
         </motion.div>
       </div>
 
-      <button onClick={girarRuleta} disabled={girando} className="btn-primary text-lg tracking-widest">
-        {girando ? "DECIDIENDO..." : "GIRAR RULETA"}
+      <button onClick={girarRuleta} disabled={girando || paso === 'reseña'} className="btn-primary w-full max-w-xs text-lg">
+        {girando ? "Decidiendo..." : "Girar Ruleta"}
       </button>
 
+      {/* Interfaz de Resultado y Reseña */}
       <AnimatePresence>
         {seleccionado && !girando && (
-          <motion.div initial={{ y: 50, opacity: 0 }} animate={{ y: 0, opacity: 1 }} className="fixed inset-x-6 bottom-32 z-50">
-            <div className="glass p-8 text-center shadow-2xl border-t-4 border-[#e57373]">
-              {paso === 'ruleta' ? (
-                <>
-                  <p className="text-[10px] font-black text-[#e57373] mb-1 uppercase tracking-widest">El plan es...</p>
-                  <h2 className="text-3xl font-bold mb-8">{seleccionado.nombre}</h2>
-                  <div className="flex gap-2">
-                    <button onClick={() => setSeleccionado(null)} className="flex-1 py-3 bg-gray-100 dark:bg-zinc-800 rounded-xl font-bold text-xs">PASAR</button>
-                    <button onClick={() => setPaso('reseña')} className="flex-1 py-3 bg-green-500 text-white rounded-xl font-bold text-xs shadow-lg">HECHO</button>
-                  </div>
-                </>
-              ) : (
-                <div className="flex flex-col gap-4">
-                  <h2 className="font-bold italic">¿Qué tal estuvo?</h2>
-                  <div className="flex justify-center gap-1">
-                    {[1, 2, 3, 4, 5].map((s) => (
-                      <button key={s} onClick={() => setRating(s)} className="p-1 transform active:scale-125 transition">
-                        <Star size={30} fill={s <= rating ? "#fbbf24" : "none"} stroke={s <= rating ? "#fbbf24" : "#ccc"} />
-                      </button>
-                    ))}
-                  </div>
-                  <textarea 
-                    className="w-full p-3 rounded-xl bg-black/5 dark:bg-white/5 border-none outline-none text-sm h-24"
-                    placeholder="Escribe un recuerdo..."
-                    value={comentario} onChange={(e) => setComentario(e.target.value)}
-                  />
-                  <button onClick={guardarReseña} className="btn-primary w-full">GUARDAR ❤️</button>
+          <motion.div 
+            initial={{ opacity: 0, scale: 0.9 }} 
+            animate={{ opacity: 1, scale: 1 }}
+            className="glass p-6 w-full text-center shadow-2xl border-2 border-[#e57373]/20"
+          >
+            {paso === 'ruleta' ? (
+              <>
+                <h2 className="text-xl font-bold mb-2">¡Plan elegido!</h2>
+                <p className="text-3xl font-bold text-[#e57373] mb-2">{seleccionado.nombre}</p>
+                <p className="text-gray-500 mb-6">📍 {seleccionado.ubicacion || 'Sin ubicación'}</p>
+                
+                <div className="flex gap-3">
+                  <button onClick={() => setSeleccionado(null)} className="flex-1 p-3 bg-gray-100 rounded-2xl font-medium">Rechazar</button>
+                  <button onClick={() => setPaso('reseña')} className="flex-1 p-3 bg-green-500 text-white rounded-2xl font-bold shadow-lg shadow-green-200">¡Aceptar!</button>
                 </div>
-              )}
-            </div>
+              </>
+            ) : (
+              <div className="flex flex-col gap-4">
+                <h2 className="text-xl font-bold">¿Qué tal estuvo?</h2>
+                
+                {/* Selector de estrellas */}
+                <div className="flex justify-center gap-1">
+                  {[1, 2, 3, 4, 5].map((star) => (
+                    <button key={star} onClick={() => setRating(star)}>
+                      <Star 
+                        size={32} 
+                        fill={star <= rating ? "#fbbf24" : "none"} 
+                        stroke={star <= rating ? "#fbbf24" : "#d1d5db"} 
+                      />
+                    </button>
+                  ))}
+                </div>
+
+                <textarea 
+                  placeholder="Escribe un recuerdo corto..." 
+                  className="w-full p-3 rounded-xl bg-white/50 border-none outline-none resize-none h-24 text-sm"
+                  value={comentario}
+                  onChange={(e) => setComentario(e.target.value)}
+                />
+
+                <button 
+                  onClick={guardarExperiencia} 
+                  disabled={enviando}
+                  className="w-full p-4 bg-[#e57373] text-white rounded-2xl font-bold shadow-lg"
+                >
+                  {enviando ? "Guardando..." : "Guardar en el Álbum ❤️"}
+                </button>
+                <button onClick={() => setPaso('ruleta')} className="text-sm text-gray-400">Volver atrás</button>
+              </div>
+            )}
           </motion.div>
         )}
       </AnimatePresence>
