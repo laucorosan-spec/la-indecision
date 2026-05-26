@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import confetti from 'canvas-confetti';
 import { supabase } from '@/lib/supabase';
-import { Star } from 'lucide-react'; // Asegúrate de que lucide-react esté instalado
+import { Star, Moon, Heart, Trophy, Calendar } from 'lucide-react'; // Asegúrate de que lucide-react esté instalado
 
 export default function Home() {
   const [planes, setPlanes] = useState([]);
@@ -11,7 +11,6 @@ export default function Home() {
   const [seleccionado, setSeleccionado] = useState(null);
   const [girando, setGirando] = useState(false);
   
-  // Estados para la reseña
   const [paso, setPaso] = useState('ruleta'); // 'ruleta' o 'reseña'
   const [rating, setRating] = useState(5);
   const [comentario, setComentario] = useState('');
