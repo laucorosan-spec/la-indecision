@@ -14,13 +14,13 @@ export default function Navbar() {
 
   return (
     <div className="fixed bottom-8 left-0 right-0 flex justify-center z-[100] px-6">
-      <nav className="glass px-8 py-4 flex gap-10 shadow-2xl">
+      <nav className="glass px-8 py-4 flex gap-10 shadow-2xl items-center">
         {links.map((item) => {
           const Icon = item.icon;
           const active = pathname === item.href;
           return (
             <Link key={item.href} href={item.href}>
-              <Icon size={24} className={`transition-all ${active ? 'text-[#e57373] scale-125' : 'text-gray-400'}`} />
+              <Icon size={24} className={`transition-all duration-300 ${active ? 'text-[#e57373] scale-125' : 'text-gray-400'}`} />
             </Link>
           );
         })}
