@@ -11,17 +11,17 @@
 
 .dark {
   --bg: #0d0d0d;
-  --text: #ffffff;
+  --text: #f5f5f5;
   --primary: #ff5252;
-  --glass: rgba(25, 25, 25, 0.6);
+  --glass: rgba(25, 25, 25, 0.7);
 }
 
 body {
   background-color: var(--bg);
   color: var(--text);
   font-family: 'Inter', -apple-system, sans-serif;
-  transition: background-color 0.3s ease;
   margin: 0;
+  transition: background-color 0.3s ease;
 }
 
 .glass {
