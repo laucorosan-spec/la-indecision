@@ -6,59 +6,49 @@
   --bg: #fdfbf7;
   --text: #2d2d2d;
   --primary: #e57373;
-  --glass: rgba(255, 255, 255, 0.6);
-  --shadow: rgba(0, 0, 0, 0.05);
+  --glass: rgba(255, 255, 255, 0.4);
 }
 
 .dark {
-  --bg: #0a0a0a;
+  --bg: #0d0d0d;
   --text: #ffffff;
   --primary: #ff5252;
-  --glass: rgba(30, 30, 30, 0.8);
-  --shadow: rgba(0, 0, 0, 0.4);
+  --glass: rgba(25, 25, 25, 0.6);
 }
 
 body {
   background-color: var(--bg);
   color: var(--text);
   font-family: 'Inter', -apple-system, sans-serif;
+  transition: background-color 0.3s ease;
   margin: 0;
-  -webkit-font-smoothing: antialiased;
 }
 
-/* EFECTO CRISTAL REAL */
 .glass {
   background: var(--glass);
-  backdrop-filter: blur(15px);
-  -webkit-backdrop-filter: blur(15px);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
   border: 1px solid rgba(255, 255, 255, 0.2);
-  border-radius: 28px;
-  box-shadow: 0 10px 30px var(--shadow);
+  border-radius: 24px;
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.05);
 }
 
-/* BOTÓN AESTHETIC PROFESIONAL */
 .btn-primary {
   background-color: var(--primary);
   color: white;
   font-weight: 800;
-  padding: 18px 36px;
+  padding: 16px 32px;
   border-radius: 100px;
   border: none;
   cursor: pointer;
-  transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-  box-shadow: 0 10px 20px -5px var(--primary);
+  transition: all 0.3s ease;
+  box-shadow: 0 10px 20px -5px rgba(229, 115, 115, 0.4);
   width: 100%;
-  max-width: 320px;
+  max-width: 300px;
   text-transform: uppercase;
-  letter-spacing: 1.5px;
-  font-size: 16px;
-}
-
-.btn-primary:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 15px 25px -5px var(--primary);
+  letter-spacing: 1px;
 }
 
 .btn-primary:active {
-  transform: scale(0.94);
+  transform: scale(0.95);
 }
