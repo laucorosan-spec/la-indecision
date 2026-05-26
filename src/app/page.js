@@ -20,7 +20,7 @@ export default function Home() {
 
   const girar = () => {
     const posibles = planes.filter(p => p.categoria === filtro);
-    if (posibles.length === 0) return alert("No hay planes aquí");
+    if (posibles.length === 0) return alert("No hay planes en esta categoría");
     setGirando(true);
     setSeleccionado(null);
     setTimeout(() => {
@@ -32,35 +32,41 @@ export default function Home() {
   };
 
   return (
-    <div className="flex flex-col items-center gap-10 pt-10 px-6 max-w-md mx-auto">
-      <h1 className="text-3xl font-bold text-[#e57373]">La Indecisión</h1>
+    <div className="flex flex-col items-center gap-10">
+      <h1 className="text-3xl font-bold text-[#e57373] mt-4">La Indecisión</h1>
       
-      {/* Selector de Categoría */}
-      <div className="bg-white/50 p-1 rounded-full flex gap-1 shadow-inner">
-        <button onClick={() => setFiltro('hoy')} className={`px-6 py-2 rounded-full text-sm font-medium transition ${filtro === 'hoy' ? 'bg-[#e57373] text-white shadow-md' : 'text-gray-500'}`}>Hoy</button>
-        <button onClick={() => setFiltro('futuro')} className={`px-6 py-2 rounded-full text-sm font-medium transition ${filtro === 'futuro' ? 'bg-[#e57373] text-white shadow-md' : 'text-gray-500'}`}>Futuro</button>
+      {/* Selector de Categoría pill-style */}
+      <div className="bg-white shadow-sm p-1 rounded-full flex w-48 justify-center">
+        <button 
+          onClick={() => setFiltro('hoy')} 
+          className={`px-6 py-2 rounded-full text-xs font-bold transition-all ${filtro === 'hoy' ? 'bg-[#e57373] text-white shadow-md' : 'text-gray-400'}`}
+        >Hoy</button>
+        <button 
+          onClick={() => setFiltro('futuro')} 
+          className={`px-6 py-2 rounded-full text-xs font-bold transition-all ${filtro === 'futuro' ? 'bg-[#e57373] text-white shadow-md' : 'text-gray-400'}`}
+        >Futuro</button>
       </div>
 
-      {/* Círculo Punteado */}
-      <div className="relative flex items-center justify-center">
+      {/* Círculo Punteado Grande */}
+      <div className="relative my-4">
         <motion.div
           animate={girando ? { rotate: 3600 } : { rotate: 0 }}
           transition={{ duration: 2, ease: "circOut" }}
-          className="w-64 h-64 rounded-full border-4 border-[#e57373] border-dashed flex items-center justify-center bg-white shadow-xl"
+          className="w-64 h-64 rounded-full border-4 border-[#e57373] border-dashed flex items-center justify-center bg-white shadow-2xl"
         >
-          <span className="text-6xl">🎡</span>
+          <span className="text-7xl">🎡</span>
         </motion.div>
       </div>
 
-      <button onClick={girar} disabled={girando} className="btn-coral w-full text-lg">
+      <button onClick={girar} disabled={girando} className="btn-coral w-full max-w-[320px] text-lg font-bold">
         {girando ? "Decidiendo..." : "Girar Ruleta"}
       </button>
 
       {seleccionado && !girando && (
-        <div className="glass-card p-6 w-full text-center mt-4">
-          <p className="text-xs uppercase font-bold text-[#e57373] mb-1">Resultado</p>
-          <h2 className="text-2xl font-bold">{seleccionado.nombre}</h2>
-        </div>
+        <motion.div initial={{ scale: 0.8, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="glass-card p-6 w-full text-center mt-4">
+          <p className="text-[10px] uppercase font-black text-[#e57373] mb-1 tracking-widest">Resultado</p>
+          <h2 className="text-2xl font-bold text-[#2d2d2d]">{seleccionado.nombre}</h2>
+        </motion.div>
       )}
     </div>
   );
