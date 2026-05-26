@@ -146,11 +146,6 @@ export default function Ajustes() {
       </p>
     </div>
   );
-}
-"use client";
-import { useState, useEffect } from 'react';
-import { Moon, Sun, Heart, Award, Calendar } from 'lucide-react';
-// ... otros imports
 
 export default function Ajustes() {
   const [darkMode, setDarkMode] = useState(false);
