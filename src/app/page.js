@@ -1,6 +1,6 @@
 "use client";
 import { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { supabase } from '@/lib/supabase';
 import confetti from 'canvas-confetti';
 
@@ -20,7 +20,7 @@ export default function Home() {
 
   const girar = () => {
     const posibles = planes.filter(p => p.categoria === filtro);
-    if (posibles.length === 0) return alert("No hay planes guardados aún ✨");
+    if (posibles.length === 0) return alert("¡Añade planes primero! ✨");
     setGirando(true);
     setSeleccionado(null);
     setTimeout(() => {
@@ -32,43 +32,46 @@ export default function Home() {
   };
 
   return (
-    <div className="flex flex-col items-center gap-8">
-      <h1 className="text-4xl font-bold text-[#e57373] mt-2 italic">La Indecisión</h1>
+    <div className="flex flex-col items-center gap-12">
+      <h1 className="text-3xl font-bold text-[#e57373] tracking-tight">La Indecisión</h1>
       
-      {/* Selector de Categoría pill-style */}
-      <div className="bg-white/80 backdrop-blur-sm p-1 rounded-full flex w-full max-w-[240px] shadow-sm border border-gray-100">
-        <button 
-          onClick={() => setFiltro('hoy')} 
-          className={`flex-1 py-2 rounded-full text-xs font-bold transition-all ${filtro === 'hoy' ? 'bg-[#e57373] text-white shadow-md' : 'text-gray-400'}`}
-        >HOY</button>
-        <button 
-          onClick={() => setFiltro('futuro')} 
-          className={`flex-1 py-2 rounded-full text-xs font-bold transition-all ${filtro === 'futuro' ? 'bg-[#e57373] text-white shadow-md' : 'text-gray-400'}`}
-        >FUTURO</button>
+      {/* Filtros Pill-Style */}
+      <div className="bg-white/50 p-1 rounded-full flex w-56 shadow-inner border border-white/20">
+        {['hoy', 'futuro'].map((f) => (
+          <button 
+            key={f}
+            onClick={() => setFiltro(f)}
+            className={`flex-1 py-2 rounded-full text-[10px] font-bold transition-all ${filtro === f ? 'bg-[#e57373] text-white shadow-md' : 'text-gray-400'}`}
+          >
+            {f.toUpperCase()}
+          </button>
+        ))}
       </div>
 
-      {/* LA RULETA - Tamaño Grande (320px) */}
-      <div className="relative my-6">
-        <div className="absolute -inset-4 bg-[#e57373]/10 rounded-full blur-2xl"></div>
+      {/* Ruleta Grande con proporciones de tu CSS */}
+      <div className="relative">
+        <div className="absolute -inset-4 bg-[#e57373]/5 rounded-full blur-2xl"></div>
         <motion.div
           animate={girando ? { rotate: 3600 } : { rotate: 0 }}
           transition={{ duration: 2, ease: "circOut" }}
-          className="w-72 h-72 sm:w-80 sm:h-80 rounded-full border-[10px] border-[#e57373] border-dashed flex items-center justify-center bg-white shadow-2xl relative z-10"
+          className="w-72 h-72 rounded-full border-[8px] border-[#e57373] border-dashed flex items-center justify-center bg-white shadow-xl relative z-10"
         >
-          <span className="text-8xl drop-shadow-lg">{girando ? "💫" : "🎡"}</span>
+          <span className="text-7xl">{girando ? "💫" : "🎡"}</span>
         </motion.div>
       </div>
 
-      <button onClick={girar} disabled={girando} className="btn-coral w-full text-lg uppercase tracking-widest font-black py-5">
+      <button onClick={girar} disabled={girando} className="btn-primary">
         {girando ? "Decidiendo..." : "Girar Ruleta"}
       </button>
 
-      {seleccionado && !girando && (
-        <motion.div initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} className="glass-card p-8 w-full text-center mt-4 border-t-4 border-[#e57373]">
-          <p className="text-[10px] uppercase font-black text-[#e57373] mb-2 tracking-[3px]">¡Plan Elegido!</p>
-          <h2 className="text-3xl font-bold text-[#2d2d2d] leading-tight">{seleccionado.nombre}</h2>
-        </motion.div>
-      )}
+      <AnimatePresence>
+        {seleccionado && !girando && (
+          <motion.div initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} className="glass p-8 w-full text-center">
+            <p className="text-[10px] font-bold text-[#e57373] uppercase tracking-widest mb-1">Ha salido...</p>
+            <h2 className="text-2xl font-bold text-[#2d2d2d] leading-tight">{seleccionado.nombre}</h2>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
