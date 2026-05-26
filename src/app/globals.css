@@ -4,65 +4,68 @@
 
 :root {
   --background: #fdfbf7;
-  --foreground: #2d2d2d;
-  --card-bg: rgba(255, 255, 255, 0.4);
+  --foreground: #1a1a1a;
+  --card-bg: rgba(255, 255, 255, 0.7);
   --primary: #e57373;
-  --border: rgba(0, 0, 0, 0.1);
+  --border: rgba(0, 0, 0, 0.05);
+  --shadow: rgba(0, 0, 0, 0.1);
 }
 
 .dark {
-  --background: #0a0a0a;
+  --background: #050505;
   --foreground: #ffffff;
-  --card-bg: rgba(30, 30, 30, 0.6);
+  --card-bg: rgba(20, 20, 20, 0.8);
   --primary: #ff5252;
   --border: rgba(255, 255, 255, 0.1);
+  --shadow: rgba(0, 0, 0, 0.5);
 }
 
 body {
   background-color: var(--background);
   color: var(--foreground);
-  font-family: 'Inter', sans-serif;
+  font-family: 'Inter', -apple-system, sans-serif;
   min-height: 100vh;
-  transition: background-color 0.3s ease, color 0.3s ease;
+  transition: background-color 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .glass {
   background: var(--card-bg);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
   border: 1px solid var(--border);
-  border-radius: 24px;
+  border-radius: 28px;
+  box-shadow: 0 8px 32px 0 var(--shadow);
 }
 
-/* 
-   HEMOS CAMBIADO ESTO: 
-   En lugar de @apply, usamos CSS estándar para evitar errores de compilación 
-*/
 .btn-primary {
   background-color: var(--primary);
   color: white;
   font-weight: 700;
-  padding: 0.75rem 1.5rem;
+  padding: 1rem 2rem;
   border-radius: 9999px;
-  transition: all 0.2s ease;
-  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+  box-shadow: 0 10px 20px -5px var(--primary);
   display: inline-flex;
   align-items: center;
   justify-content: center;
   border: none;
   cursor: pointer;
+  width: 100%;
+  max-width: 320px;
 }
 
 .btn-primary:hover {
-  opacity: 0.9;
-  transform: translateY(-1px);
+  transform: translateY(-2px);
+  filter: brightness(1.1);
+  box-shadow: 0 15px 25px -5px var(--primary);
 }
 
 .btn-primary:active {
-  transform: scale(0.95);
+  transform: scale(0.96);
 }
 
-.btn-primary:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
+/* Animación para la ruleta */
+@keyframes spin-slow {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
 }
