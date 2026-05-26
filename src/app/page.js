@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import confetti from 'canvas-confetti';
+import { supabase } from '@/lib/supabase';
 
 export default function Home() {
   const [planes, setPlanes] = useState([]);
@@ -9,13 +10,22 @@ export default function Home() {
   const [seleccionado, setSeleccionado] = useState(null);
   const [girando, setGirando] = useState(false);
 
+  // Cargar planes desde Supabase
+  const cargarPlanes = async () => {
+    const { data, error } = await supabase
+      .from('planes')
+      .select('*')
+      .eq('hecho', false); // Solo traer los que no están hechos
+    
+    if (!error) setPlanes(data);
+  };
+
   useEffect(() => {
-    const guardados = JSON.parse(localStorage.getItem('planes') || '[]');
-    setPlanes(guardados);
+    cargarPlanes();
   }, []);
 
   const girarRuleta = () => {
-    const posibles = planes.filter(p => p.categoria === filtro && !p.hecho);
+    const posibles = planes.filter(p => p.categoria === filtro);
     if (posibles.length === 0) return alert("No hay planes en esta categoría");
     
     setGirando(true);
@@ -29,19 +39,17 @@ export default function Home() {
     }, 2000);
   };
 
-  // --- ESTA ES LA FUNCIÓN NUEVA ---
-  const marcarComoHecho = (id) => {
-    const nuevosPlanes = planes.map(p => {
-      if (p.id === id) {
-        return { ...p, hecho: true }; // Marcamos el plan como completado
-      }
-      return p;
-    });
-    
-    setPlanes(nuevosPlanes);
-    localStorage.setItem('planes', JSON.stringify(nuevosPlanes));
-    setSeleccionado(null); // Cerramos el cartelito
-    alert("¡Plan enviado al álbum! ❤️");
+  const marcarComoHecho = async (id) => {
+    const { error } = await supabase
+      .from('planes')
+      .update({ hecho: true })
+      .eq('id', id);
+
+    if (!error) {
+      setSeleccionado(null);
+      cargarPlanes(); // Recargar la lista
+      alert("¡Al álbum! ❤️");
+    }
   };
 
   return (
@@ -49,14 +57,8 @@ export default function Home() {
       <h1 className="text-3xl font-bold text-[#e57373]">La Indecisión</h1>
       
       <div className="flex gap-4 glass p-2">
-        <button 
-          onClick={() => setFiltro('hoy')}
-          className={`px-4 py-2 rounded-xl transition ${filtro === 'hoy' ? 'bg-[#e57373] text-white' : ''}`}
-        >Hoy</button>
-        <button 
-          onClick={() => setFiltro('futuro')}
-          className={`px-4 py-2 rounded-xl transition ${filtro === 'futuro' ? 'bg-[#e57373] text-white' : ''}`}
-        >Más adelante</button>
+        <button onClick={() => setFiltro('hoy')} className={`px-4 py-2 rounded-xl ${filtro === 'hoy' ? 'bg-[#e57373] text-white' : ''}`}>Hoy</button>
+        <button onClick={() => setFiltro('futuro')} className={`px-4 py-2 rounded-xl ${filtro === 'futuro' ? 'bg-[#e57373] text-white' : ''}`}>Más adelante</button>
       </div>
 
       <div className="relative w-64 h-64 flex items-center justify-center">
@@ -75,23 +77,12 @@ export default function Home() {
 
       <AnimatePresence>
         {seleccionado && !girando && (
-          <motion.div 
-            initial={{ opacity: 0, y: 20 }} 
-            animate={{ opacity: 1, y: 0 }}
-            className="glass p-6 w-full text-center"
-          >
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="glass p-6 w-full text-center">
             <h2 className="text-xl font-bold mb-2">¡Plan elegido!</h2>
             <p className="text-2xl text-[#e57373] mb-4">{seleccionado.nombre}</p>
-            <p className="text-sm text-gray-500 mb-6">📍 {seleccionado.ubicacion}</p>
             <div className="flex gap-2">
-              <button onClick={() => setSeleccionado(null)} className="flex-1 p-2 border border-gray-300 rounded-xl">Rechazar</button>
-              {/* Aquí usamos la nueva función */}
-              <button 
-                onClick={() => marcarComoHecho(seleccionado.id)} 
-                className="flex-1 p-2 bg-green-500 text-white rounded-xl"
-              >
-                ¡Aceptar!
-              </button>
+              <button onClick={() => setSeleccionado(null)} className="flex-1 p-2 border rounded-xl">Rechazar</button>
+              <button onClick={() => marcarComoHecho(seleccionado.id)} className="flex-1 p-2 bg-green-500 text-white rounded-xl">¡Aceptar!</button>
             </div>
           </motion.div>
         )}
